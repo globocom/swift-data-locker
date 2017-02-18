@@ -20,7 +20,7 @@ For example:
     pipeline = catch_errors cache tempauth data_locker proxy-server
 
     [filter:data_locker]
-    use = egg:swift#data_locker
+    use = egg:swift_data_locker#data_locker
 
 To block delete requests on account level:
 

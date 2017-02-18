@@ -19,7 +19,7 @@ For example:
     pipeline = catch_errors cache tempauth data_locker proxy-server
 
     [filter:data_locker]
-    use = egg:swift#data_locker
+    use = egg:swift_data_locker#data_locker
 
 To block delete requests on account level:
 
@@ -78,7 +78,7 @@ class DataLocker(object):
     def __call__(self, req):
 
         # Get will never be locked
-        if req.method.lower() == 'get':
+        if req.method.lower() == 'get' or self._is_obj_req(req) is False:
             return self.app
 
         locked_methods = self._get_req_lockers(req)
@@ -88,6 +88,19 @@ class DataLocker(object):
             return swob.HTTPForbidden()
 
         return self.app
+
+    def _is_obj_req(self, req):
+        """ Return True if it is a object url. False otherwise. """
+        try:
+            vrs, acc, con, obj = req.split_path(2, 4, rest_with_last=True)
+        except ValueError:
+            return False
+
+        # con = None: account URI | obj = None: container URI
+        if con is None or obj is None:
+            return False
+
+        return True
 
     def _get_req_lockers(self, req):
         """ GET container and account locker metadata from request """

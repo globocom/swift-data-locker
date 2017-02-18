@@ -24,6 +24,79 @@ class DataLockerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status, '200 OK')
 
+    @patch('data_locker.middleware.get_container_info')
+    def test_invalid_header_doesnt_break(self, mock):
+        mock.return_value = {
+            'meta': {
+                md.META_DATA_LOCKER: 'invalid'
+            }
+        }
+
+        response = swob.Request.blank(
+            '/v1/a/c/o',
+            environ={'REQUEST_METHOD': 'GET'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+    @patch('data_locker.middleware.get_container_info')
+    def test_container_request_never_blocked(self, mock):
+        mock.return_value = {
+            'meta': {
+                md.META_DATA_LOCKER: 'delete, create'
+            }
+        }
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'DELETE'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'PUT'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'POST'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+    @patch('data_locker.middleware.get_account_info')
+    def test_account_request_never_blocked(self, mock):
+        mock.return_value = {
+            'meta': {
+                md.META_DATA_LOCKER: 'delete, create'
+            }
+        }
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'DELETE'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'PUT'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
+        response = swob.Request.blank(
+            '/v1/a/c',
+            environ={'REQUEST_METHOD': 'POST'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+
     def test_unlocked_delete_request(self):
         response = swob.Request.blank(
             '/v1/a/c/o',

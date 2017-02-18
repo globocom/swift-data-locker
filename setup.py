@@ -22,7 +22,7 @@ setup(
     license='Apache License (2.0)',
     author='Storm Team Globo.com',
     author_email='storm@corp.globo.com',
-    url='https://git@github.com:globocom/swift_data_locker.git',
+    url='https://git@github.com:globocom/swift-data-locker.git',
     packages=find_packages(),
     install_requires=reqs,
     include_package_data=True,

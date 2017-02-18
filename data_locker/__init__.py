@@ -1,0 +1,1 @@
+from data_locker.middleware import filter_factory

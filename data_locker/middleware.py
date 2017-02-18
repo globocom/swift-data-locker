@@ -41,7 +41,7 @@ METHODS = {
 
 class DataLocker(object):
     """
-    Swift data locker middleware
+    Swift Data Locker middleware
     See above for a full description.
     """
 
@@ -51,10 +51,43 @@ class DataLocker(object):
         self.app = app
         self.conf = conf
 
+        self.logger.info('Data Locker middleware started...')
+
     @swob.wsgify
     def __call__(self, req):
 
+        # Get will never be locked
+        if req.method.lower() == 'get':
+            return self.app
+
+        locked_methods = self._get_req_lockers(req)
+
+        if req.method.lower() in locked_methods:
+            self.logger.info('{} {} blocked'.format(req.method, req.path_info))
+            return swob.HTTPForbidden()
+
         return self.app
+
+    def _get_req_lockers(self, req):
+        """ GET container and account locker metadata from request """
+
+        locker_methods = []
+
+        sysmeta_acc = get_account_info(req.environ, self.app).get('meta')
+        lockers_acc = sysmeta_acc.get(META_DATA_LOCKER, '').split(',')
+
+        for locker in lockers_acc:
+            _locker = locker.strip().lower()
+            locker_methods = locker_methods + METHODS.get(_locker, [])
+
+        sysmeta_con = get_container_info(req.environ, self.app).get('meta')
+        lockers_con = sysmeta_con.get(META_DATA_LOCKER, '').split(',')
+
+        for locker in lockers_con:
+            _locker = locker.strip().lower()
+            locker_methods = locker_methods + METHODS.get(_locker, [])
+
+        return list(set(locker_methods))
 
 
 def filter_factory(global_conf, **local_conf):

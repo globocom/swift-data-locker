@@ -16,13 +16,38 @@ class DataLockerTestCase(unittest.TestCase):
     def setUp(self):
         self.app = md.DataLocker(FakeApp(), {})
 
-    def test_get_request(self):
+    @patch('data_locker.middleware.DataLocker._get_req_lockers')
+    def test_get_request(self, mock):
+        """ GET never get blocked and return immediatly """
         response = swob.Request.blank(
             '/v1/a/c/o',
             environ={'REQUEST_METHOD': 'GET'}
         ).get_response(self.app)
 
         self.assertEqual(response.status, '200 OK')
+        mock.assert_not_called()
+
+    @patch('data_locker.middleware.DataLocker._get_req_lockers')
+    def test_head_request(self, mock):
+        """ HEAD never get blocked and return immediatly """
+        response = swob.Request.blank(
+            '/v1/a/c/o',
+            environ={'REQUEST_METHOD': 'HEAD'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+        mock.assert_not_called()
+
+    @patch('data_locker.middleware.DataLocker._get_req_lockers')
+    def test_options_request(self, mock):
+        """ OPTIONS never get blocked and return immediatly """
+        response = swob.Request.blank(
+            '/v1/a/c/o',
+            environ={'REQUEST_METHOD': 'OPTIONS'}
+        ).get_response(self.app)
+
+        self.assertEqual(response.status, '200 OK')
+        mock.assert_not_called()
 
     @patch('data_locker.middleware.get_container_info')
     def test_invalid_header_doesnt_break(self, mock):

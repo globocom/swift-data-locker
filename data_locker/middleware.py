@@ -54,6 +54,7 @@ from swift.common import swob, utils
 from swift.proxy.controllers.base import get_account_info, get_container_info
 
 META_DATA_LOCKER = 'data-locker'
+READ_METHODS = ['get', 'head', 'options']
 METHODS = {
     'delete': ['delete'],
     'create': ['post', 'put']
@@ -78,7 +79,8 @@ class DataLocker(object):
     def __call__(self, req):
 
         # Get will never be locked
-        if req.method.lower() == 'get' or self._is_obj_req(req) is False:
+        if req.method.lower() in READ_METHODS or\
+           self._is_obj_req(req) is False:
             return self.app
 
         locked_methods = self._get_req_lockers(req)

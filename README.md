@@ -50,6 +50,30 @@ To unlock requests:
 
     swift post -m data-locker:
 
+# Usage example:
+
+    $ swift post test
+    $ echo "test" > test_file
+    $ swift upload test test_file
+    test_file
+    $ swift list test
+    test_file
+    $ swift delete test test_file
+    test_file
+    $ swift list test
+    $ swift post test -m data-locker:delete
+    $ swift upload test test_file
+    test_file
+    $ swift list test
+    test_file
+    $ swift delete test test_file
+    Error Deleting: test/test_file: Object DELETE failed: http://saio:8080/v1/AUTH_test/test/test_file 403 Forbidden  [first 60 chars of response] <html><h1>Forbidden</h1><p>Access was denied to this resourc
+    $ swift post test -m data-locker:
+    $ swift delete test test_file
+    test_file
+    $ swift list test
+    $
+
 # Testing
 
     pip install -r requirements_test.txt
